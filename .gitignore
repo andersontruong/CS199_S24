@@ -1,3 +1,9 @@
+*.xclbin
+
+build_dir/
+
+build/
+
 # Prerequisites
 *.d
 
