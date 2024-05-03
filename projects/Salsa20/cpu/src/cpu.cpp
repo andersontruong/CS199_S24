@@ -4,6 +4,7 @@
 #include <cstring>
 #include <fstream>
 #include <unistd.h>
+#include <chrono>
 
 #define ROUNDS 20
 #define ROTL32(v, c) (((v) << (c) | ((v) >> (32 - (c)))))
@@ -157,12 +158,21 @@ int main(int argc, char** argv) {
     uint32_t output_buffer[BUFFER_SIZE*2];
     unsigned int bytes_read = read(0, input_buffer, BUFFER_SIZE*4*2);
     unsigned int block_count = bytes_read / 64 + (bytes_read % 64 != 0);
+
+    const auto start = std::chrono::steady_clock::now();
     for (unsigned int i = 0; i < block_count; ++i)
         cipher.encrypt_block(input_buffer + (BUFFER_SIZE*i), output_buffer + (BUFFER_SIZE*i));
+    const auto end = std::chrono::steady_clock::now();
 
     for (int i = 0; i < BUFFER_SIZE*2; ++i) {
         std::cout << "[" << i << "]: 0x" << std::hex << output_buffer[i] << std::endl;
     }
+
+    const std::chrono::steady_clock::duration time_span = end - start;
+
+    double nseconds = double(time_span.count()) * std::chrono::steady_clock::period::num / std::chrono::steady_clock::period::den;
+
+    std::cout << nseconds << std::endl;
 
     // const int buffer_size = 64;
     // uint8_t input_buffer[64];

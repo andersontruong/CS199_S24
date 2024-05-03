@@ -52,6 +52,7 @@ int main(int argc, char** argv) {
     /*
         Allocate Buffer in Global Memory
     */
+    const auto start = std::chrono::steady_clock::now();
     printf("Using host pointer with MigrateMemObjects\n");
     OCL_CHECK(err, 
         cl::Buffer buffer_key(
@@ -108,10 +109,17 @@ int main(int argc, char** argv) {
     OCL_CHECK(err, err = q.enqueueMigrateMemObjects({buffer_out}, CL_MIGRATE_MEM_OBJECT_HOST));
     
     OCL_CHECK(err, err = q.finish());
+    const auto end = std::chrono::steady_clock::now();
 
     for (int i = 0; i < BUFFER_SIZE*2; ++i) {
         std::cout << "[" << i << "]: 0x" << std::hex << ciphertext_buffer[i] << std::endl;
     }
+
+    const std::chrono::steady_clock::duration time_span = end - start;
+
+    double nseconds = double(time_span.count()) * std::chrono::steady_clock::period::num / std::chrono::steady_clock::period::den;
+
+    std::cout << nseconds << std::endl;
 
     return EXIT_SUCCESS;
 }
